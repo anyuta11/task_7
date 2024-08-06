@@ -19,16 +19,19 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'home.home')->name('home');
 
-Route::get('admin', [\App\Http\Controllers\Auth\LoginController::class,'showLoginForm'] )->name('admin');
-
-Route::post('admin/login', [\App\Http\Controllers\Auth\LoginController::class,'login'])->name('login');
+Route::get('admin', [\App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('admin');
+Route::post('admin/login', [\App\Http\Controllers\Auth\LoginController::class, 'login'])->name('login');
+Route::get('admin/login', [\App\Http\Controllers\Auth\LoginController::class, 'login'])->name('test');
 Route::post('admin/logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 
-Route::view('admin/dashboard', 'admin.dashboard')->name('dashboard');
+Route::middleware('admin')->group(function () {
+    Route::view('admin/dashboard', 'admin.dashboard')->name('dashboard');
+});
 
-Route::prefix('dashboard')->group(function (){
-   Route::resource('book',App\Http\Controllers\admin\AdminBookController::class);
-   Route::resource('author',App\Http\Controllers\admin\AdminAuthorController::class);
+
+Route::prefix('dashboard')->group(function () {
+    Route::resource('book', App\Http\Controllers\admin\AdminBookController::class);
+    Route::resource('author', App\Http\Controllers\admin\AdminAuthorController::class);
 });
 
 Route::resource('books', BookController::class);
