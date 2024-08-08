@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AuthorRequest;
 use App\Models\Author;
-use Illuminate\Http\Request;
 
 class AdminAuthorController extends Controller
 {
@@ -26,18 +26,13 @@ class AdminAuthorController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(AuthorRequest $request)
     {
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'biography' => 'required|string',
-        ]);
+        $author = new Author();
+        $author->fill($request->validated());
+        $author->save();
 
-        Author::create($request->only('first_name', 'last_name', 'biography'));
-
-        return redirect()->route('admin.authors.index');
-
+        return redirect()->route('author.index');
     }
 
     /**
@@ -45,7 +40,7 @@ class AdminAuthorController extends Controller
      */
     public function show(string $id)
     {
-        $author = Author::find($id);
+        $author = Author::findorFail($id);
 
         return view('admin.authors.show', compact('author'));
     }
@@ -55,7 +50,7 @@ class AdminAuthorController extends Controller
      */
     public function edit(string $id)
     {
-        $author = Author::find($id);
+        $author = Author::findorFail($id);
 
         return view('admin.authors.edit', compact('author'));
     }
@@ -63,15 +58,10 @@ class AdminAuthorController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(AuthorRequest $request, string $id)
     {
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'biography' => 'required|string',
-        ]);
-
-        Author::find($id)->update($request->only('first_name', 'last_name', 'biography'));
+        $author = Author::findorFail($id);
+        $author->update($request->validated());
 
         return redirect()->route('author.index');
     }
@@ -81,7 +71,7 @@ class AdminAuthorController extends Controller
      */
     public function destroy(string $id)
     {
-        Author::find($id)->delete();
+        Author::findorFail($id)->delete();
 
         return redirect()->route('author.index');
     }

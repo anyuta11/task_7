@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AuthorRequest;
 use App\Models\Author;
-use Illuminate\Http\Request;
 
 class AuthorController extends Controller
 {
@@ -25,15 +25,11 @@ class AuthorController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(AuthorRequest $request)
     {
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'biography' => 'required|string',
-        ]);
-
-        Author::create($request->only('first_name', 'last_name', 'biography'));
+        $author = new Author();
+        $author->fill($request->validated());
+        $author->save();
 
         return redirect()->route('authors.index');
 
@@ -44,7 +40,7 @@ class AuthorController extends Controller
      */
     public function show(string $id)
     {
-        $author = Author::find($id);
+        $author = Author::findorFail($id);
 
         return view('authors.show', compact('author'));
     }
@@ -54,7 +50,7 @@ class AuthorController extends Controller
      */
     public function edit(string $id)
     {
-        $author = Author::find($id);
+        $author = Author::findorFail($id);
 
         return view('authors.edit', compact('author'));
     }
@@ -62,15 +58,10 @@ class AuthorController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(AuthorRequest $request, string $id)
     {
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'biography' => 'required|string',
-        ]);
-
-        Author::find($id)->update($request->only('first_name', 'last_name', 'biography'));
+        $author = Author::findorFail($id);
+        $author->update($request->validated());
 
         return redirect()->route('authors.index');
     }
@@ -80,7 +71,7 @@ class AuthorController extends Controller
      */
     public function destroy(string $id)
     {
-        Author::find($id)->delete();
+        Author::findorFail($id)->delete();
 
         return redirect()->route('authors.index');
     }

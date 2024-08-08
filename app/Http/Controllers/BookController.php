@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BookRequest;
 use App\Models\Author;
 use App\Models\Book;
-use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
@@ -31,17 +31,11 @@ class BookController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(BookRequest $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required',
-            'publication_year' => 'required|integer',
-            'authors' => 'required|array',
-            'authors.*' => 'exists:authors,id',
-        ]);
-
-        $book = Book::create($request->only('title', 'description', 'publication_year'));
+        $book = new Book();
+        $book->fill($request->validated());
+        $book->save();
         $book->authors()->sync($request->authors);
 
         return redirect()->route('books.index');
@@ -52,7 +46,7 @@ class BookController extends Controller
      */
     public function show(string $id)
     {
-        $book = Book::find($id);
+        $book = Book::findorFail($id);
 
         return view('books.show', compact('book'));
     }
@@ -62,7 +56,7 @@ class BookController extends Controller
      */
     public function edit(string $id)
     {
-        $book = Book::with('authors')->find($id);
+        $book = Book::with('authors')->findorFail($id);
         $allAuthors = Author::all();
 
         return view('books.edit', compact('book', 'allAuthors'));
@@ -71,18 +65,10 @@ class BookController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(BookRequest $request, string $id)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required',
-            'publication_year' => 'required|integer',
-            'authors' => 'required|array',
-            'authors.*' => 'exists:authors,id',
-        ]);
-
         $book = Book::findorFail($id);
-        $book->update($request->only('title', 'description', 'publication_year'));
+        $book->update($request->validated());
 
         $book->authors()->sync($request->authors);
 
@@ -94,7 +80,7 @@ class BookController extends Controller
      */
     public function destroy(string $id)
     {
-        $book = Book::find($id);
+        $book = Book::findorFail($id);
         $book->delete();
 
         return redirect()->route('books.index');

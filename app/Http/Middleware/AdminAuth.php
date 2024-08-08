@@ -16,9 +16,10 @@ class AdminAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::guard('web')->check()) {
-            return redirect()->route('test');
-        }
+//
+//        if (!Auth::guard('web')->check()) {
+//            return redirect('admin/login');
+//        }
 
         return $next($request);
     }
